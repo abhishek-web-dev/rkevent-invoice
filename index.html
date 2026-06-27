@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RK Event Jhansi - Invoice Generator</title>
+    
+    <!-- SEO Optimization -->
+    <meta name="description" content="Generate, print, and export professional invoices for RK Event Jhansi. Live calculations, UPI payment QR code, and WhatsApp integration.">
+    <meta name="author" content="Rahul Kumar">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- App Header (Hidden during Printing) -->
+    <header class="app-header no-print">
+        <div class="main-container d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div class="app-title-logo">
+                <!-- Inline SVG Fallback if logo.png is missing -->
+                <img src="logo.png" class="company-logo-img" alt="RK Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2265%22 height=%2265%22 viewBox=%220 0 65 65%22><rect width=%2265%22 height=%2265%22 rx=%2212%22 fill=%22%232563eb%22/><text x=%2250%%22 y=%2250%%22 font-family=%22Outfit%22 font-size=%2222%22 font-weight=%22bold%22 fill=%22%23ffffff%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>RKE</text></svg>'">
+                <div>
+                    <h2>RK Event Jhansi</h2>
+                    <p>Professional Invoice Billing Studio</p>
+                </div>
+            </div>
+            <div class="text-md-end text-start">
+                <span class="badge bg-light text-dark py-2 px-3 border"><i class="fas fa-user-circle text-primary me-2"></i>Rahul Kumar (Owner)</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <div class="row">
+            
+            <!-- Left Side: Invoice Form (Hidden during Printing) -->
+            <div class="col-lg-5 col-xl-5 no-print">
+                <form id="invoiceForm" onsubmit="event.preventDefault();">
+                    
+                    <!-- Customer Information Card -->
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-user text-primary"></i>Customer Information</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="mb-3">
+                                <label for="custName" class="form-label">Customer Name</label>
+                                <input type="text" id="custName" class="form-control" placeholder="Enter customer name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="custMobile" class="form-label">Mobile Number</label>
+                                <input type="tel" id="custMobile" class="form-control" placeholder="Enter 10-digit mobile number" required pattern="[0-9]{10}">
+                            </div>
+                            <div class="mb-0">
+                                <label for="custAddress" class="form-label">Address</label>
+                                <textarea id="custAddress" class="form-control" rows="2" placeholder="Enter customer address" required></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Event Information Card -->
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-calendar-alt text-primary"></i>Event Information</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="mb-3">
+                                <label for="eventType" class="form-label">Event Type</label>
+                                <select id="eventType" class="form-select" required>
+                                    <option value="" disabled selected>Select Event Type</option>
+                                    <option value="Wedding Shoot">Wedding Shoot</option>
+                                    <option value="Pre Wedding Shoot">Pre Wedding Shoot</option>
+                                    <option value="Birthday Shoot">Birthday Shoot</option>
+                                    <option value="Event Planning">Event Planning</option>
+                                    <option value="Decoration">Decoration</option>
+                                    <option value="Photography">Photography</option>
+                                    <option value="Videography">Videography</option>
+                                    <option value="Drone Shoot">Drone Shoot</option>
+                                    <option value="Album Design">Album Design</option>
+                                    <option value="Other Custom Services">Other Custom Services</option>
+                                </select>
+                                <div id="customEventTypeContainer" class="mt-2 d-none">
+                                    <label for="customEventType" class="form-label">Custom Event Name</label>
+                                    <input type="text" id="customEventType" class="form-control" placeholder="Enter custom event type">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="eventDate" class="form-label">Event Date</label>
+                                    <input type="date" id="eventDate" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="eventLocation" class="form-label">Event Location</label>
+                                    <input type="text" id="eventLocation" class="form-control" placeholder="e.g. Hotel, Jhansi" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Invoice Info Card -->
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-file-invoice-dollar text-primary"></i>Invoice Information</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="mb-3">
+                                <label for="invoiceNum" class="form-label">Invoice Number</label>
+                                <input type="text" id="invoiceNum" class="form-control bg-light" readonly>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <label for="invoiceDate" class="form-label">Invoice Date</label>
+                                    <input type="date" id="invoiceDate" class="form-control" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="status" class="form-label">Payment Status</label>
+                                    <select id="status" class="form-select" required>
+                                        <option value="Pending">Pending</option>
+                                        <option value="Partial Paid">Partial Paid</option>
+                                        <option value="Paid">Paid</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Services Section Card -->
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-concierge-bell text-primary"></i>Services & Packages</h5>
+                            <button type="button" id="addServiceBtn" class="btn btn-sm btn-outline-primary"><i class="fas fa-plus me-1"></i>Add Row</button>
+                        </div>
+                        <div class="card-body-custom p-0">
+                            <div class="table-responsive">
+                                <table class="table services-table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Service Name</th>
+                                            <th class="text-center">Qty</th>
+                                            <th class="text-end">Rate</th>
+                                            <th class="text-end">Amount</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="servicesContainer">
+                                        <!-- Javascript dynamically populates items here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment Section Card -->
+                    <div class="card-custom">
+                        <div class="card-header-custom">
+                            <h5><i class="fas fa-wallet text-primary"></i>Payment Summary</h5>
+                        </div>
+                        <div class="card-body-custom">
+                            <div class="mb-3">
+                                <label for="totalAmount" class="form-label">Total Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="text" id="totalAmount" class="form-control bg-light text-end fw-bold" readonly value="0.00">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="advancePaid" class="form-label">Advance Paid</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" id="advancePaid" class="form-control text-end fw-bold text-success" min="0" value="0">
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <label for="balanceDue" class="form-label">Balance Due</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="text" id="balanceDue" class="form-control bg-light text-end fw-bold text-danger" readonly value="0.00">
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <button type="button" id="btnGeneratePdf" class="btn btn-primary-custom w-100"><i class="fas fa-file-pdf me-2"></i>Generate PDF</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" id="btnPrint" class="btn btn-secondary-custom w-100"><i class="fas fa-print me-2"></i>Print Invoice</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" id="btnWhatsApp" class="btn btn-success-custom w-100"><i class="fab fa-whatsapp me-2"></i>WhatsApp Share</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="button" id="btnReset" class="btn btn-accent-custom w-100"><i class="fas fa-redo me-2"></i>Reset Form</button>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                    
+                </form>
+            </div>
+            
+            <!-- Right Side: Live Invoice Preview -->
+            <div class="col-lg-7 col-xl-7">
+                <div class="preview-sticky">
+                    <div class="invoice-preview-wrapper">
+                        
+                        <!-- Invoice Container -->
+                        <div class="invoice-preview-container" id="invoicePreview">
+                            
+                            <!-- Background Watermark -->
+                            <div class="invoice-watermark">RK EVENT JHANSI</div>
+                            
+                            <div class="invoice-content-layer">
+                                
+                                <!-- Invoice Header -->
+                                <div class="invoice-header-row">
+                                    <div class="company-brand-section">
+                                        <!-- Inline SVG fallback inside invoice if logo.png is missing -->
+                                        <img src="logo.png" class="company-logo-img" alt="RK Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2265%22 height=%2265%22 viewBox=%220 0 65 65%22><rect width=%2265%22 height=%2265%22 rx=%2212%22 fill=%22%232563eb%22/><text x=%2250%%22 y=%2250%%22 font-family=%22Outfit%22 font-size=%2222%22 font-weight=%22bold%22 fill=%22%23ffffff%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>RKE</text></svg>'">
+                                        <div class="company-brand-info">
+                                            <h2>RK Event Jhansi</h2>
+                                            <p>Owner: Rahul Kumar</p>
+                                        </div>
+                                    </div>
+                                    <div class="company-contact-info">
+                                        <p><i class="fas fa-phone-alt"></i>9369649071</p>
+                                        <p><i class="fas fa-envelope"></i>Rkeventrajgarh@gmail.com</p>
+                                        <p><i class="fas fa-globe"></i>rk-event-jhansi.grexa.site</p>
+                                        <p><i class="fas fa-map-marker-alt"></i>PNB Front, Rajgarh, Jhansi</p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Invoice Info Block -->
+                                <div class="invoice-meta-row">
+                                    <div class="meta-item">
+                                        <span class="meta-label">Invoice Number</span>
+                                        <span class="meta-val" id="prev-invoice-num">-</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Invoice Date</span>
+                                        <span class="meta-val" id="prev-invoice-date">-</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <span class="meta-label">Payment Status</span>
+                                        <div><span class="status-badge status-pending" id="prev-invoice-status">Pending</span></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Client & Event Details Grid -->
+                                <div class="invoice-details-grid">
+                                    <div class="details-card">
+                                        <h6>Billed To (Customer Details)</h6>
+                                        <div class="detail-line"><strong>Name:</strong> <span id="prev-cust-name">-</span></div>
+                                        <div class="detail-line"><strong>Phone:</strong> <span id="prev-cust-mobile">-</span></div>
+                                        <div class="detail-line"><strong>Address:</strong> <span id="prev-cust-address">-</span></div>
+                                    </div>
+                                    <div class="details-card">
+                                        <h6>Event Details</h6>
+                                        <div class="detail-line"><strong>Event Type:</strong> <span id="prev-event-type">-</span></div>
+                                        <div class="detail-line"><strong>Event Date:</strong> <span id="prev-event-date">-</span></div>
+                                        <div class="detail-line"><strong>Location:</strong> <span id="prev-event-location">-</span></div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Services Table -->
+                                <table class="invoice-items-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-service">Service Details</th>
+                                            <th class="col-qty text-center">Qty</th>
+                                            <th class="col-rate text-right">Rate</th>
+                                            <th class="col-amount text-right">Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="prev-items-body">
+                                        <!-- Dynamic table contents rendered on-the-fly -->
+                                    </tbody>
+                                </table>
+                                
+                                <!-- Payment Summary & QR Block -->
+                                <div class="payment-summary-row">
+                                    
+                                    <!-- QR Code section -->
+                                    <div class="qr-payment-box">
+                                        <div id="qrcode"></div>
+                                        <div class="qr-info">
+                                            <span class="qr-title">Scan & Pay</span>
+                                            <span class="qr-subtitle">Scan QR using any UPI App to Pay</span>
+                                            <span class="qr-upi-id">9169659965-5@ybl</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Grand Total calculations -->
+                                    <div class="summary-details-box">
+                                        <div class="summary-line">
+                                            <span>Total Amount:</span>
+                                            <span id="prev-total-amount">₹0.00</span>
+                                        </div>
+                                        <div class="summary-line">
+                                            <span>Advance Paid:</span>
+                                            <span id="prev-advance-paid">₹0.00</span>
+                                        </div>
+                                        <div id="balance-due-row" class="summary-line balance-due">
+                                            <span>Balance Due:</span>
+                                            <span id="prev-balance-due">₹0.00</span>
+                                        </div>
+                                    </div>
+                                    
+                                </div>
+                                
+                                <!-- Footer info & Signatures -->
+                                <div class="invoice-footer-row">
+                                    <div class="footer-thanks">
+                                        <p class="fw-bold text-dark mb-1">Thank You for Your Business!</p>
+                                        <p>Thank you for choosing RK Event Jhansi to design and capture your perfect moments. If you have any inquiries regarding this invoice, feel free to contact us.</p>
+                                    </div>
+                                    <div class="signature-box">
+                                        <!-- Signature Image with SVG Fallback if signature.png is missing -->
+                                        <img src="signature.png" alt="Signature" id="prev-signature-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2250%22 viewBox=%220 0 150 50%22><text x=%2250%%22 y=%2260%%22 font-family=%22Brush Script MT, cursive, Arial%22 font-size=%2224%22 font-style=%22italic%22 fill=%22%231e293b%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>Rahul Kumar</text></svg>'">
+                                        <div class="signature-line">Authorized Sign</div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- External Script Integrations -->
+    <!-- Bootstrap 5 Bundle JS (Includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- html2pdf.js Bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <!-- qrcode.js Bundle -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <!-- Core logic script -->
+    <script src="script.js"></script>
+</body>
+</html>
