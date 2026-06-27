@@ -83,6 +83,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add dynamic service item row
     function addServiceRow(name = '', qty = 1, rate = 0) {
+        // Enforce maximum of 15 service items on the single-page invoice
+        const currentRows = document.querySelectorAll('.service-row');
+        if (currentRows.length >= 15) {
+            alert("Maximum 15 service items are allowed on a single-page invoice.");
+            return;
+        }
+
         const rowId = 'row-' + Date.now() + '-' + Math.floor(Math.random() * 1000);
         const isCustom = name && !businessServices.includes(name);
         const rowHTML = `
@@ -148,34 +155,52 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCalculationsAndPreview();
     }
 
-    // Calculations & Live Preview Update
+    // Main logic: Calculate inputs and update previews dynamically
     function updateCalculationsAndPreview() {
         let total = 0;
-        
-        // Read service rows and calculate item amounts
-        const serviceRows = document.querySelectorAll('.service-row');
         const invoiceItems = [];
         
-        serviceRows.forEach(row => {
-            const selectElem = row.querySelector('.service-name-input');
-            const customInputElem = row.querySelector('.service-custom-name-input');
-            let name = selectElem.value;
-            if (name === 'Other Custom Services') {
-                name = (customInputElem && customInputElem.value.trim()) ? customInputElem.value.trim() : 'Other Custom Service';
+        // Loop through each service item row
+        const rows = document.querySelectorAll('.service-row');
+        
+        // Apply automatic page layout compression class if service items exceed 5
+        const previewContainer = document.getElementById('invoicePreview');
+        if (rows.length > 5) {
+            previewContainer.classList.add('compact-preview');
+        } else {
+            previewContainer.classList.remove('compact-preview');
+        }
+
+        rows.forEach(row => {
+            const nameSelect = row.querySelector('.service-name-input');
+            const customInput = row.querySelector('.service-custom-name-input');
+            const qtyInput = row.querySelector('.service-qty-input');
+            const rateInput = row.querySelector('.service-rate-input');
+            const amountSpan = row.querySelector('.service-amount-span');
+            
+            let nameVal = nameSelect.value || '';
+            if (nameVal === 'Other Custom Services') {
+                nameVal = customInput.value.trim() || 'Custom Service';
             }
-            const qty = parseFloat(row.querySelector('.service-qty-input').value) || 0;
-            const rate = parseFloat(row.querySelector('.service-rate-input').value) || 0;
-            const amount = qty * rate;
             
-            row.querySelector('.service-amount-span').textContent = amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-            total += amount;
+            const qtyVal = parseInt(qtyInput.value) || 0;
+            const rateVal = parseFloat(rateInput.value) || 0;
+            const rowTotal = qtyVal * rateVal;
             
-            if (selectElem.value) {
-                invoiceItems.push({ name, qty, rate, amount });
+            amountSpan.textContent = rowTotal.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            total += rowTotal;
+            
+            if (nameVal) {
+                invoiceItems.push({
+                    name: nameVal,
+                    qty: qtyVal,
+                    rate: rateVal,
+                    amount: rowTotal
+                });
             }
         });
         
-        // Update payments values
+        // Fetch values
         const advance = parseFloat(document.getElementById('advancePaid').value) || 0;
         const balance = total - advance;
         
@@ -202,7 +227,9 @@ document.addEventListener('DOMContentLoaded', function() {
         prevEventLocation.textContent = document.getElementById('eventLocation').value || 'Not Set';
         
         const invoiceNumVal = document.getElementById('invoiceNum').value;
-        prevInvoiceNum.textContent = invoiceNumVal;
+        document.querySelectorAll('.prev-invoice-num-sync').forEach(elem => {
+            elem.textContent = invoiceNumVal;
+        });
         prevInvoiceDate.textContent = formatDateDisplay(document.getElementById('invoiceDate').value);
         
         // Status Badge Style Sync
@@ -285,7 +312,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Custom Event Type Toggle logic
+    // Custom Event Type Toggle logic & Dynamic first row sync
     const eventTypeSelect = document.getElementById('eventType');
     const customEventTypeContainer = document.getElementById('customEventTypeContainer');
     const customEventTypeInput = document.getElementById('customEventType');
@@ -363,20 +390,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const total = parseFloat(document.getElementById('totalAmount').value) || 0;
         const advance = parseFloat(document.getElementById('advancePaid').value) || 0;
         const balance = total - advance;
-
-        if (!custName) {
-            alert("Please enter the Customer Name to share.");
-            document.getElementById('custName').focus();
+        
+        if (!custName || !custMobile) {
+            alert("Please enter customer name and mobile number first.");
             return;
         }
         
-        if (!custMobile) {
-            alert("Please enter the Customer's Mobile Number to send via WhatsApp.");
-            document.getElementById('custMobile').focus();
-            return;
-        }
-
-        // WhatsApp pre-formatted string composition
         const message = `Hello ${custName},\n\nThank you for choosing RK Event Jhansi.\n\nInvoice No: ${invoiceNum}\nTotal Amount: ₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nAdvance Paid: ₹${advance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\nBalance Due: ₹${balance.toLocaleString('en-IN', { minimumFractionDigits: 2 })}\n\nPlease find your invoice attached.\n\nWarm regards,\nRK Event Jhansi`;
         
         // Clean mobile number (only keep digits)
@@ -395,47 +414,123 @@ document.addEventListener('DOMContentLoaded', function() {
         window.print();
     });
 
-    // Export PDF using html2pdf.js
+    // Wait helper: Returns a promise that resolves when all images inside container are loaded
+    function waitImagesLoaded(container) {
+        const imgs = container.querySelectorAll('img');
+        const promises = Array.from(imgs).map(img => {
+            if (img.complete) {
+                return Promise.resolve();
+            }
+            return new Promise(resolve => {
+                img.addEventListener('load', resolve);
+                img.addEventListener('error', resolve); // resolve anyway on error
+            });
+        });
+        return Promise.all(promises);
+    }
+
+    // Rebuilt PDF Generation using direct html2canvas and jsPDF page-by-page mapping
     btnGeneratePdf.addEventListener('click', function() {
         const invoiceNum = document.getElementById('invoiceNum').value;
-        const element = document.getElementById('invoicePreview');
+        const page1 = document.querySelector('.invoice-page');
+        const page2 = document.querySelector('.terms-page');
+        const previewContainer = document.getElementById('invoicePreview');
         
-        // Optimize pdf output configuration
-        const opt = {
-            margin:       [0, 0, 0, 0],
-            filename:     `Invoice-${invoiceNum}.pdf`,
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, 
-                letterRendering: true,
-                logging: false,
-                scrollX: 0,
-                scrollY: 0
-            },
-            jsPDF:        { 
-                unit: 'mm', 
-                format: 'a4', 
-                orientation: 'portrait' 
-            }
-        };
+        if (!page1 || !page2) {
+            alert("Error: Invoice pages not found in layout.");
+            return;
+        }
 
         // Add visual loading state
         const originalText = btnGeneratePdf.innerHTML;
         btnGeneratePdf.disabled = true;
-        btnGeneratePdf.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Generating...`;
+        btnGeneratePdf.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...`;
 
-        html2pdf().set(opt).from(element).save()
-            .then(() => {
-                btnGeneratePdf.disabled = false;
-                btnGeneratePdf.innerHTML = originalText;
-            })
-            .catch(err => {
-                console.error("PDF generation error: ", err);
-                alert("An error occurred while generating the PDF. Please try again.");
+        // html2canvas configurations
+        // Scale 2 is optimized. useCORS loads images cleanly.
+        // allowTaint: true is omitted/false to avoid SecurityError during toDataURL export
+        const html2canvasOpts = {
+            scale: 2,
+            useCORS: true,
+            allowTaint: false,
+            backgroundColor: "#ffffff",
+            scrollX: 0,
+            scrollY: 0
+        };
+
+        // Step 1: Wait for all images inside invoice preview to load
+        waitImagesLoaded(previewContainer).then(() => {
+            console.log("All invoice images loaded successfully. Compiling Page 1 canvas...");
+            
+            // Step 2: Render Page 1
+            html2canvas(page1, html2canvasOpts).then(canvas1 => {
+                const imgData1 = canvas1.toDataURL('image/jpeg', 0.98);
+                console.log("Page 1 canvas compiled. Compiling Page 2 canvas...");
+
+                // Step 3: Render Page 2
+                html2canvas(page2, html2canvasOpts).then(canvas2 => {
+                    const imgData2 = canvas2.toDataURL('image/jpeg', 0.98);
+                    console.log("Page 2 canvas compiled. Instantiating jsPDF...");
+
+                    // Fetch jsPDF class reference dynamically
+                    let jsPDFClass = window.jsPDF;
+                    if (window.jspdf && window.jspdf.jsPDF) {
+                        jsPDFClass = window.jspdf.jsPDF;
+                    }
+
+                    if (!jsPDFClass) {
+                        throw new Error("jsPDF library was not loaded on this page.");
+                    }
+
+                    // A4 Dimensions: 210mm x 297mm
+                    const pdf = new jsPDFClass({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
+                    // Add Page 1 image, fitting aspect ratio
+                    const imgWidth1 = 210;
+                    let imgHeight1 = (canvas1.height * imgWidth1) / canvas1.width;
+                    if (imgHeight1 > 297) {
+                        imgHeight1 = 297;
+                    }
+                    pdf.addImage(imgData1, 'JPEG', 0, 0, imgWidth1, imgHeight1);
+
+                    // Add Page 2 image, fitting aspect ratio
+                    pdf.addPage();
+                    const imgWidth2 = 210;
+                    let imgHeight2 = (canvas2.height * imgWidth2) / canvas2.width;
+                    if (imgHeight2 > 297) {
+                        imgHeight2 = 297;
+                    }
+                    pdf.addImage(imgData2, 'JPEG', 0, 0, imgWidth2, imgHeight2);
+
+                    // Save the PDF file
+                    pdf.save(`Invoice-${invoiceNum}.pdf`);
+                    console.log("PDF generated and downloaded successfully.");
+
+                    // Restore button
+                    btnGeneratePdf.disabled = false;
+                    btnGeneratePdf.innerHTML = originalText;
+                }).catch(err => {
+                    console.error("PDF Page 2 compilation failed: ", err);
+                    alert("An error occurred while compiling PDF Page 2. See console for details.");
+                    btnGeneratePdf.disabled = false;
+                    btnGeneratePdf.innerHTML = originalText;
+                });
+            }).catch(err => {
+                console.error("PDF Page 1 compilation failed: ", err);
+                alert("An error occurred while compiling PDF Page 1. See console for details.");
                 btnGeneratePdf.disabled = false;
                 btnGeneratePdf.innerHTML = originalText;
             });
+        }).catch(err => {
+            console.error("Image loading wait failed: ", err);
+            alert("An error occurred while waiting for invoice images to load. See console.");
+            btnGeneratePdf.disabled = false;
+            btnGeneratePdf.innerHTML = originalText;
+        });
     });
 
     // Initialize on page load

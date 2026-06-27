@@ -150,7 +150,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="servicesContainer">
-                                        <!-- Javascript dynamically populates items here -->
+                                        <!-- Dynamic rows populate here -->
                                     </tbody>
                                 </table>
                             </div>
@@ -212,123 +212,183 @@
                 <div class="preview-sticky">
                     <div class="invoice-preview-wrapper">
                         
-                        <!-- Invoice Container -->
+                        <!-- Invoice Container Wrapper -->
                         <div class="invoice-preview-container" id="invoicePreview">
                             
-                            <!-- Background Watermark -->
-                            <div class="invoice-watermark">RK EVENT JHANSI</div>
+                            <!-- PAGE 1: INVOICE DETAILS -->
+                            <div class="invoice-page">
+                                <!-- Background Watermark -->
+                                <div class="invoice-watermark">RK EVENT JHANSI</div>
+                                
+                                <div class="invoice-content-layer">
+                                    <!-- Invoice Header -->
+                                    <div class="invoice-header-row">
+                                        <div class="company-brand-section">
+                                            <img src="logo.png" class="company-logo-img" alt="RK Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2265%22 height=%2265%22 viewBox=%220 0 65 65%22><rect width=%2265%22 height=%2265%22 rx=%2212%22 fill=%22%232563eb%22/><text x=%2250%%22 y=%2250%%22 font-family=%22Outfit%22 font-size=%2222%22 font-weight=%22bold%22 fill=%22%23ffffff%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>RKE</text></svg>'">
+                                            <div class="company-brand-info">
+                                                <h2>RK Event Jhansi</h2>
+                                                <p>Owner: Rahul Kumar</p>
+                                            </div>
+                                        </div>
+                                        <div class="company-contact-info">
+                                            <p><i class="fas fa-phone-alt"></i>9369649071</p>
+                                            <p><i class="fas fa-envelope"></i>Rkeventrajgarh@gmail.com</p>
+                                            <p><i class="fas fa-globe"></i>rk-event-jhansi.grexa.site</p>
+                                            <p><i class="fas fa-map-marker-alt"></i>PNB Front, Rajgarh, Jhansi</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Invoice Info Block -->
+                                    <div class="invoice-meta-row">
+                                        <div class="meta-item">
+                                            <span class="meta-label">Invoice Number</span>
+                                            <span class="meta-val prev-invoice-num-sync" id="prev-invoice-num">-</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <span class="meta-label">Invoice Date</span>
+                                            <span class="meta-val" id="prev-invoice-date">-</span>
+                                        </div>
+                                        <div class="meta-item">
+                                            <span class="meta-label">Payment Status</span>
+                                            <div><span class="status-badge status-pending" id="prev-invoice-status">Pending</span></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Client & Event Details Grid -->
+                                    <div class="invoice-details-grid">
+                                        <div class="details-card">
+                                            <h6>Billed To (Customer Details)</h6>
+                                            <div class="detail-line"><strong>Name:</strong> <span id="prev-cust-name">-</span></div>
+                                            <div class="detail-line"><strong>Phone:</strong> <span id="prev-cust-mobile">-</span></div>
+                                            <div class="detail-line"><strong>Address:</strong> <span id="prev-cust-address">-</span></div>
+                                        </div>
+                                        <div class="details-card">
+                                            <h6>Event Details</h6>
+                                            <div class="detail-line"><strong>Event Type:</strong> <span id="prev-event-type">-</span></div>
+                                            <div class="detail-line"><strong>Event Date:</strong> <span id="prev-event-date">-</span></div>
+                                            <div class="detail-line"><strong>Location:</strong> <span id="prev-event-location">-</span></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Services Table -->
+                                    <table class="invoice-items-table">
+                                        <thead>
+                                            <tr>
+                                                <th class="col-service">Service Details</th>
+                                                <th class="col-qty text-center">Qty</th>
+                                                <th class="col-rate text-right">Rate</th>
+                                                <th class="col-amount text-right">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="prev-items-body">
+                                            <!-- Dynamic table contents rendered on-the-fly -->
+                                        </tbody>
+                                    </table>
+                                    
+                                    <!-- Payment Summary & QR Block -->
+                                    <div class="payment-summary-row">
+                                        <!-- QR Code section -->
+                                        <div class="qr-payment-box">
+                                            <div id="qrcode"></div>
+                                            <div class="qr-info">
+                                                <span class="qr-title">Scan & Pay</span>
+                                                <span class="qr-subtitle">Scan QR using any UPI App to Pay</span>
+                                                <span class="qr-upi-id">9169659965-5@ybl</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Grand Total calculations -->
+                                        <div class="summary-details-box">
+                                            <div class="summary-line">
+                                                <span>Total Amount:</span>
+                                                <span id="prev-total-amount">₹0.00</span>
+                                            </div>
+                                            <div class="summary-line">
+                                                <span>Advance Paid:</span>
+                                                <span id="prev-advance-paid">₹0.00</span>
+                                            </div>
+                                            <div id="balance-due-row" class="summary-line balance-due">
+                                                <span>Balance Due:</span>
+                                                <span id="prev-balance-due">₹0.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Footer info & Signatures -->
+                                    <div class="invoice-footer-row">
+                                        <div class="footer-thanks">
+                                            <p class="fw-bold text-dark mb-1">Thank You for Your Business!</p>
+                                            <p>Thank you for choosing RK Event Jhansi to design and capture your perfect moments.</p>
+                                        </div>
+                                        <div class="signature-box">
+                                            <img src="signature.png" alt="Signature" id="prev-signature-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2250%22 viewBox=%220 0 150 50%22><text x=%2250%%22 y=%2260%%22 font-family=%22Brush Script MT, cursive, Arial%22 font-size=%2224%22 font-style=%22italic%22 fill=%22%231e293b%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>Rahul Kumar</text></svg>'">
+                                            <div class="signature-line">Authorized Sign</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             
-                            <div class="invoice-content-layer">
+                            <!-- PAGE BREAK -->
+                            <div class="page-break"></div>
+                            
+                            <!-- PAGE 2: TERMS AND CONDITIONS -->
+                            <div class="terms-page">
+                                <!-- Background Watermark -->
+                                <div class="invoice-watermark">RK EVENT JHANSI</div>
                                 
-                                <!-- Invoice Header -->
-                                <div class="invoice-header-row">
-                                    <div class="company-brand-section">
-                                        <!-- Inline SVG fallback inside invoice if logo.png is missing -->
-                                        <img src="logo.png" class="company-logo-img" alt="RK Logo" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2265%22 height=%2265%22 viewBox=%220 0 65 65%22><rect width=%2265%22 height=%2265%22 rx=%2212%22 fill=%22%232563eb%22/><text x=%2250%%22 y=%2250%%22 font-family=%22Outfit%22 font-size=%2222%22 font-weight=%22bold%22 fill=%22%23ffffff%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>RKE</text></svg>'">
-                                        <div class="company-brand-info">
-                                            <h2>RK Event Jhansi</h2>
-                                            <p>Owner: Rahul Kumar</p>
-                                        </div>
-                                    </div>
-                                    <div class="company-contact-info">
-                                        <p><i class="fas fa-phone-alt"></i>9369649071</p>
-                                        <p><i class="fas fa-envelope"></i>Rkeventrajgarh@gmail.com</p>
-                                        <p><i class="fas fa-globe"></i>rk-event-jhansi.grexa.site</p>
-                                        <p><i class="fas fa-map-marker-alt"></i>PNB Front, Rajgarh, Jhansi</p>
-                                    </div>
-                                </div>
-                                
-                                <!-- Invoice Info Block -->
-                                <div class="invoice-meta-row">
-                                    <div class="meta-item">
-                                        <span class="meta-label">Invoice Number</span>
-                                        <span class="meta-val" id="prev-invoice-num">-</span>
-                                    </div>
-                                    <div class="meta-item">
-                                        <span class="meta-label">Invoice Date</span>
-                                        <span class="meta-val" id="prev-invoice-date">-</span>
-                                    </div>
-                                    <div class="meta-item">
-                                        <span class="meta-label">Payment Status</span>
-                                        <div><span class="status-badge status-pending" id="prev-invoice-status">Pending</span></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Client & Event Details Grid -->
-                                <div class="invoice-details-grid">
-                                    <div class="details-card">
-                                        <h6>Billed To (Customer Details)</h6>
-                                        <div class="detail-line"><strong>Name:</strong> <span id="prev-cust-name">-</span></div>
-                                        <div class="detail-line"><strong>Phone:</strong> <span id="prev-cust-mobile">-</span></div>
-                                        <div class="detail-line"><strong>Address:</strong> <span id="prev-cust-address">-</span></div>
-                                    </div>
-                                    <div class="details-card">
-                                        <h6>Event Details</h6>
-                                        <div class="detail-line"><strong>Event Type:</strong> <span id="prev-event-type">-</span></div>
-                                        <div class="detail-line"><strong>Event Date:</strong> <span id="prev-event-date">-</span></div>
-                                        <div class="detail-line"><strong>Location:</strong> <span id="prev-event-location">-</span></div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Services Table -->
-                                <table class="invoice-items-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="col-service">Service Details</th>
-                                            <th class="col-qty text-center">Qty</th>
-                                            <th class="col-rate text-right">Rate</th>
-                                            <th class="col-amount text-right">Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="prev-items-body">
-                                        <!-- Dynamic table contents rendered on-the-fly -->
-                                    </tbody>
-                                </table>
-                                
-                                <!-- Payment Summary & QR Block -->
-                                <div class="payment-summary-row">
+                                <div class="invoice-content-layer">
                                     
-                                    <!-- QR Code section -->
-                                    <div class="qr-payment-box">
-                                        <div id="qrcode"></div>
-                                        <div class="qr-info">
-                                            <span class="qr-title">Scan & Pay</span>
-                                            <span class="qr-subtitle">Scan QR using any UPI App to Pay</span>
-                                            <span class="qr-upi-id">9169659965-5@ybl</span>
+                                    <!-- Terms & Conditions Container -->
+                                    <div class="terms-container terms-content">
+                                        <!-- English Version -->
+                                        <div class="terms-card">
+                                            <h5>Payment Terms & Conditions</h5>
+                                            <ul class="terms-list">
+                                                <li><i class="fas fa-check-circle"></i><strong>20% Advance Payment</strong> – At the time of booking confirmation.</li>
+                                                <li><i class="fas fa-check-circle"></i><strong>60% Payment</strong> – Before the event setup begins.</li>
+                                                <li><i class="fas fa-check-circle"></i><strong>20% Final Payment</strong> – Upon successful completion of the event.</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <!-- Hindi Version -->
+                                        <div class="terms-card">
+                                            <h5>भुगतान की शर्तें (Payment Terms & Conditions)</h5>
+                                            <ul class="terms-list">
+                                                <li><i class="fas fa-check-circle"></i><strong>20% अग्रिम भुगतान</strong> – बुकिंग की पुष्टि के समय।</li>
+                                                <li><i class="fas fa-check-circle"></i><strong>60% भुगतान</strong> – इवेंट सेटअप शुरू होने से पहले।</li>
+                                                <li><i class="fas fa-check-circle"></i><strong>20% अंतिम भुगतान</strong> – इवेंट पूर्ण होने के बाद।</li>
+                                            </ul>
+                                        </div>
+
+                                        <!-- Important Notes -->
+                                        <div class="terms-card">
+                                            <h5>Important Notes</h5>
+                                            <ul class="terms-list">
+                                                <li><i class="fas fa-exclamation-circle text-warning"></i>All payments must be made to UPI ID: <strong>9169659965-5@ybl</strong> or owner Rahul Kumar.</li>
+                                                <li><i class="fas fa-exclamation-circle text-warning"></i>Please share a transaction screenshot immediately upon payment transfer.</li>
+                                                <li><i class="fas fa-exclamation-circle text-warning"></i>Services/event booking dates are only locked after the advance confirmation deposit.</li>
+                                            </ul>
                                         </div>
                                     </div>
                                     
-                                    <!-- Grand Total calculations -->
-                                    <div class="summary-details-box">
-                                        <div class="summary-line">
-                                            <span>Total Amount:</span>
-                                            <span id="prev-total-amount">₹0.00</span>
-                                        </div>
-                                        <div class="summary-line">
-                                            <span>Advance Paid:</span>
-                                            <span id="prev-advance-paid">₹0.00</span>
-                                        </div>
-                                        <div id="balance-due-row" class="summary-line balance-due">
-                                            <span>Balance Due:</span>
-                                            <span id="prev-balance-due">₹0.00</span>
-                                        </div>
+                                    <!-- Thank You Section -->
+                                    <div class="thank-you-section text-center my-4">
+                                        <h4 class="text-primary fw-bold">Thank You for Your Business!</h4>
+                                        <p class="text-muted italic">"Designing & capturing your perfect moments with care"</p>
                                     </div>
-                                    
-                                </div>
-                                
-                                <!-- Footer info & Signatures -->
-                                <div class="invoice-footer-row">
-                                    <div class="footer-thanks">
-                                        <p class="fw-bold text-dark mb-1">Thank You for Your Business!</p>
-                                        <p>Thank you for choosing RK Event Jhansi to design and capture your perfect moments. If you have any inquiries regarding this invoice, feel free to contact us.</p>
-                                    </div>
-                                    <div class="signature-box">
-                                        <!-- Signature Image with SVG Fallback if signature.png is missing -->
-                                        <img src="signature.png" alt="Signature" id="prev-signature-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2250%22 viewBox=%220 0 150 50%22><text x=%2250%%22 y=%2260%%22 font-family=%22Brush Script MT, cursive, Arial%22 font-size=%2224%22 font-style=%22italic%22 fill=%22%231e293b%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>Rahul Kumar</text></svg>'">
-                                        <div class="signature-line">Authorized Sign</div>
+
+                                    <!-- Page 2 Signature Row (Customer + Authorized Sign) -->
+                                    <div class="invoice-footer-row signature-section">
+                                        <div class="signature-box text-start">
+                                            <div style="height: 45px; border-bottom: 1px dashed #cbd5e1; margin-bottom: 4px;"></div>
+                                            <div class="signature-line">Customer Signature</div>
+                                        </div>
+                                        <div class="signature-box text-end">
+                                            <img src="signature.png" alt="Signature" id="prev-signature-img-page2" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22150%22 height=%2250%22 viewBox=%220 0 150 50%22><text x=%2250%%22 y=%2260%%22 font-family=%22Brush Script MT, cursive, Arial%22 font-size=%2224%22 font-style=%22italic%22 fill=%22%231e293b%22 dominant-baseline=%22central%22 text-anchor=%22middle%22>Rahul Kumar</text></svg>'">
+                                            <div class="signature-line">Authorized Sign</div>
+                                        </div>
                                     </div>
                                 </div>
-                                
                             </div>
                             
                         </div>
@@ -344,8 +404,11 @@
     <!-- Bootstrap 5 Bundle JS (Includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- html2pdf.js Bundle -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
     <!-- qrcode.js Bundle -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
