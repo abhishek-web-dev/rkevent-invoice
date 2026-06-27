@@ -429,15 +429,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return Promise.all(promises);
     }
 
-    // Rebuilt PDF Generation using direct html2canvas and jsPDF page-by-page mapping
+    // Rebuilt PDF Generation using html2pdf.js bundle
     btnGeneratePdf.addEventListener('click', function() {
         const invoiceNum = document.getElementById('invoiceNum').value;
-        const page1 = document.querySelector('.invoice-page');
-        const page2 = document.querySelector('.terms-page');
-        const previewContainer = document.getElementById('invoicePreview');
+        const element = document.getElementById('invoicePreview');
         
-        if (!page1 || !page2) {
-            alert("Error: Invoice pages not found in layout.");
+        if (!element) {
+            alert("Error: Invoice preview element not found.");
             return;
         }
 
@@ -446,88 +444,49 @@ document.addEventListener('DOMContentLoaded', function() {
         btnGeneratePdf.disabled = true;
         btnGeneratePdf.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...`;
 
-        // html2canvas configurations
-        // Scale 2 is optimized. useCORS loads images cleanly.
-        // allowTaint: true is omitted/false to avoid SecurityError during toDataURL export
-        const html2canvasOpts = {
-            scale: 2,
-            useCORS: true,
-            allowTaint: false,
-            backgroundColor: "#ffffff",
-            scrollX: 0,
-            scrollY: 0
+        // html2pdf configurations
+        const opt = {
+            margin:       0,
+            filename:     `Invoice-${invoiceNum}.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { 
+                scale: 2, 
+                useCORS: true,
+                allowTaint: true, // Allow tainted canvas for local files on file:/// E:/
+                scrollX: 0, 
+                scrollY: 0
+            },
+            jsPDF:        { 
+                unit: 'mm', 
+                format: 'a4', 
+                orientation: 'portrait' 
+            },
+            pagebreak: { 
+                mode: ['css'], 
+                before: '.page-break' 
+            }
         };
 
-        // Step 1: Wait for all images inside invoice preview to load
-        waitImagesLoaded(previewContainer).then(() => {
-            console.log("All invoice images loaded successfully. Compiling Page 1 canvas...");
+        // Step 1: Wait for all images to load
+        waitImagesLoaded(element).then(() => {
+            console.log("All invoice images loaded successfully. Generating PDF via html2pdf...");
             
-            // Step 2: Render Page 1
-            html2canvas(page1, html2canvasOpts).then(canvas1 => {
-                const imgData1 = canvas1.toDataURL('image/jpeg', 0.98);
-                console.log("Page 1 canvas compiled. Compiling Page 2 canvas...");
-
-                // Step 3: Render Page 2
-                html2canvas(page2, html2canvasOpts).then(canvas2 => {
-                    const imgData2 = canvas2.toDataURL('image/jpeg', 0.98);
-                    console.log("Page 2 canvas compiled. Instantiating jsPDF...");
-
-                    // Fetch jsPDF class reference dynamically
-                    let jsPDFClass = window.jsPDF;
-                    if (window.jspdf && window.jspdf.jsPDF) {
-                        jsPDFClass = window.jspdf.jsPDF;
-                    }
-
-                    if (!jsPDFClass) {
-                        throw new Error("jsPDF library was not loaded on this page.");
-                    }
-
-                    // A4 Dimensions: 210mm x 297mm
-                    const pdf = new jsPDFClass({
-                        orientation: 'portrait',
-                        unit: 'mm',
-                        format: 'a4'
-                    });
-
-                    // Add Page 1 image, fitting aspect ratio
-                    const imgWidth1 = 210;
-                    let imgHeight1 = (canvas1.height * imgWidth1) / canvas1.width;
-                    if (imgHeight1 > 297) {
-                        imgHeight1 = 297;
-                    }
-                    pdf.addImage(imgData1, 'JPEG', 0, 0, imgWidth1, imgHeight1);
-
-                    // Add Page 2 image, fitting aspect ratio
-                    pdf.addPage();
-                    const imgWidth2 = 210;
-                    let imgHeight2 = (canvas2.height * imgWidth2) / canvas2.width;
-                    if (imgHeight2 > 297) {
-                        imgHeight2 = 297;
-                    }
-                    pdf.addImage(imgData2, 'JPEG', 0, 0, imgWidth2, imgHeight2);
-
-                    // Save the PDF file
-                    pdf.save(`Invoice-${invoiceNum}.pdf`);
-                    console.log("PDF generated and downloaded successfully.");
-
-                    // Restore button
+            // Execute html2pdf save
+            html2pdf().set(opt).from(element).save()
+                .then(() => {
+                    console.log("PDF generated and downloaded successfully via html2pdf.");
                     btnGeneratePdf.disabled = false;
                     btnGeneratePdf.innerHTML = originalText;
-                }).catch(err => {
-                    console.error("PDF Page 2 compilation failed: ", err);
-                    alert("An error occurred while compiling PDF Page 2. See console for details.");
+                })
+                .catch(err => {
+                    console.error("html2pdf rendering failed: ", err);
+                    alert("An error occurred while compiling the PDF. Please check the browser console.");
                     btnGeneratePdf.disabled = false;
                     btnGeneratePdf.innerHTML = originalText;
                 });
-            }).catch(err => {
-                console.error("PDF Page 1 compilation failed: ", err);
-                alert("An error occurred while compiling PDF Page 1. See console for details.");
-                btnGeneratePdf.disabled = false;
-                btnGeneratePdf.innerHTML = originalText;
-            });
         }).catch(err => {
-            console.error("Image loading wait failed: ", err);
-            alert("An error occurred while waiting for invoice images to load. See console.");
+            console.error("Waiting for images loaded failed: ", err);
+            alert("An error occurred while loading images before PDF generation. See console.");
             btnGeneratePdf.disabled = false;
             btnGeneratePdf.innerHTML = originalText;
         });

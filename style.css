@@ -248,7 +248,7 @@ h1, h2, h3, h4, h5, h6 {
     overflow: hidden;
 }
 
-.page-break {
+.terms-page {
     page-break-before: always;
     break-before: page;
 }
@@ -829,14 +829,9 @@ h1, h2, h3, h4, h5, h6 {
         print-color-adjust: exact;
     }
 
-    .invoice-page {
-        page-break-after: always;
-        break-after: page;
-    }
-
     .terms-page {
-        page-break-before: always;
-        break-before: page;
+        page-break-before: always !important;
+        break-before: page !important;
     }
 
     .invoice-header-row {
